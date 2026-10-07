@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class VisionChecker : MonoBehaviour
 {
-    public float viewAngle = 90;
+    public float viewAngle;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -14,6 +14,9 @@ public class VisionChecker : MonoBehaviour
     void Update()
     {
         Debug.DrawLine(transform.position, (transform.position + transform.forward), Color.green);
+
+        Debug.DrawLine(transform.position, transform.position + (Quaternion.Euler(0, viewAngle / 2, 0) * transform.forward), Color.green);
+        Debug.DrawLine(transform.position, transform.position + (Quaternion.Euler(0, -viewAngle / 2, 0) * transform.forward), Color.green);
     }
 
     private void OnTriggerStay(Collider other)
