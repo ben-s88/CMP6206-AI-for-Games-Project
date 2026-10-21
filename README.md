@@ -5,5 +5,6 @@
 3. Unity
 4. My main inspiration behind the ai and the ai director is alien isolation
 5. I will use a kanban board on Trello. The overall schedule will follow scene set up -> pathfinding work -> rough creation of the behaviour tree -> refining behaviour tree and ai senses -> scene visuals if i have enough time.
-6. I will regularly commit to this github repo and will detail the work done.
-7. references.txt
+6. Features i plan to add: node based path finding, behaviour tree with unlockable elements, AI director/controller, senses such as sight and hearing, FSM
+7. I will regularly commit to this github repo and will detail the work done.
+8. references.txt
