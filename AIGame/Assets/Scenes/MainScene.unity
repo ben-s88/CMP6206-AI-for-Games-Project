@@ -701,6 +701,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MyNavMesh
   enemy: {fileID: 1342124911}
+  Player: {fileID: 2137155346}
   cube: {fileID: 4074797618294574063, guid: 75446ad0e8aec5f4dbc065c9f1e918e5, type: 3}
   gridResolution: 1
 --- !u!4 &717706966
