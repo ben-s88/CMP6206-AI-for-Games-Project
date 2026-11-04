@@ -16,7 +16,7 @@ public class MyBT : MonoBehaviour
     }
 }
 
-public class Node
+/*public class Node
 {
     public enum result
     {
@@ -50,4 +50,4 @@ public class MoveNode : Node
         //use navmesh to move to a position
         return result.SUCCESS;
     }
-}
+}*/

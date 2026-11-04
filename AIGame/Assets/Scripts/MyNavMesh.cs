@@ -1,33 +1,70 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+struct Node
+{
+    public Node(bool passable_, GameObject obj_)
+    {
+        passable = passable_;
+        obj = obj_;
+        passed = false;
+    }
+    public bool passable;
+    public GameObject obj;
+    public bool passed;
+}
+
 public class MyNavMesh : MonoBehaviour
 {
-    GameObject[,] GOs = new GameObject[40,40];
+    Node[,] GOs = new Node[40,40];
 
     public GameObject enemy;
     public GameObject Player;
 
     public GameObject cube;
     public int gridResolution = 1;
+
+    bool pathfind = true;
+    bool nodesCollision = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         createNavMesh();
     }
 
+    
+
     // Update is called once per frame
     void Update()
     {
         //GOs[(int)enemy.transform.position.x, (int)enemy.transform.position.z].GetComponent<MeshRenderer>().material.color = new Color(1, 1, 0, 0.17f);
-        foreach (GameObject go in getAdjacentNodes((int)enemy.transform.position.x, (int)enemy.transform.position.z))
-        {
-            //go.GetComponent<MeshRenderer>().material.color = new Color(1, 1, 0, 0.17f);
-        }
 
-        Astar(enemy.transform.position.x, enemy.transform.position.z, Player.transform.position.x, Player.transform.position.z);
+        //Astar(enemy.transform.position.x, enemy.transform.position.z, Player.transform.position.x, Player.transform.position.z);
+
+        if (pathfind)
+        {
+            Astar(enemy.transform.position.x, enemy.transform.position.z, Player.transform.position.x, Player.transform.position.z);
+            pathfind = false;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (nodesCollision)
+        {
+            for (int x = 0; x < 40; x++)
+            for (int z = 0;  z < 40;  z++)
+            {
+                    GOs[x, z].passable = GOs[x, z].obj.GetComponent<GridNodeCollision>().passable;
+            }
+
+            nodesCollision = false;
+        }
     }
 
     void createNavMesh()
@@ -38,42 +75,62 @@ public class MyNavMesh : MonoBehaviour
             {
                 GameObject a = Instantiate(cube, new Vector3(x + 0.5f, 1, y + 0.5f), Quaternion.identity);
                 a.transform.localScale = Vector3.one * gridResolution * 0.9f;
-                GOs[x, y] = a;
+                Node node = new(false, a);
+                GOs[x, y] = node;
             }
         }
     }
 
-    GameObject[] getAdjacentNodes(int x, int z)
+    Node[] getAdjacentNodes(int x, int z)
     {
-        return new GameObject[] { GOs[x+ 1, z + 1], GOs[x+ 1, z- 1], GOs[x+ 1, z],
+        return new Node[] { GOs[x+ 1, z + 1], GOs[x+ 1, z- 1], GOs[x+ 1, z],
                                   GOs[x, z+ 1], GOs[x, z- 1],
                                   GOs[x- 1, z+ 1], GOs[x- 1, z- 1], GOs[x- 1, z],};
     }
 
     void Astar(float xOrigin, float zOrigin, float xDest, float zDest)
     {
-        List<GameObject> path = new List<GameObject>();
-        GameObject currentNode;
-        float currentPathLength = 0.0f;
+        List<Node> path = new List<Node>();
+        path.Add(GOs[(int)xOrigin, (int)zOrigin]);
 
-        currentNode = GOs[(int)xOrigin, (int)zOrigin];
-        GameObject bestNode = null;
+        evaluateAdjacentNodes(path, GOs[(int)xDest, (int)zDest]);
+
+        foreach (Node node in path)
+        {
+            node.obj.GetComponent<MeshRenderer>().material.color = new Color(0, 0, 0, 1);
+        }
+    }
+
+    List<Node> evaluateAdjacentNodes(List<Node> pathSoFar, Node dest) // return node with lowest heuristic
+    {
+        Node startNode = pathSoFar[pathSoFar.Count - 1];
+        Node chosenNode = new();
 
         float lowestH = 10000000.0f;
-        foreach(GameObject GO in getAdjacentNodes((int)currentNode.transform.position.x, (int)currentNode.transform.position.z))
+        foreach (Node node in getAdjacentNodes((int)startNode.obj.transform.position.x, (int)startNode.obj.transform.position.z))
         {
-            if (path.Count != 0)
+            if (!node.passable) { continue; }
+            if (pathSoFar.Any(x => x.obj.GetEntityId() == node.obj.GetEntityId())) {  continue; }
+            if (pathSoFar.Count > 0)
             {
                 //calculate g from currentpathlength
             }
-            float testH = Vector3.Distance(new Vector3(GO.transform.position.x, 0, GO.transform.position.z), new Vector3(xDest, 0, zDest));
+            float testH = Vector3.Distance(new Vector3(node.obj.transform.position.x, 0, node.obj.transform.position.z), dest.obj.transform.position);
             if (testH < lowestH)
             {
                 lowestH = testH;
-                bestNode = GO;
+                chosenNode = node;
             }
         }
 
-        bestNode.GetComponent<MeshRenderer>().material.color = new Color(0, 0, 0, 1);
+        pathSoFar.Add(chosenNode);
+        if (chosenNode.obj == dest.obj)
+        {  
+            return pathSoFar; 
+        }
+        else
+        {
+            return evaluateAdjacentNodes(pathSoFar, dest); // return the 
+        }
     }
 }

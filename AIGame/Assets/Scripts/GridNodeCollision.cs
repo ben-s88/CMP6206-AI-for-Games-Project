@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GridNodeCollision : MonoBehaviour
 {
-    bool passable = true;
+    public bool passable = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
