@@ -1,10 +1,33 @@
-# CMP6206_Starter-repo
+# Cyborg Horror - Unity
 
-1. cyborg horror
-2. My game will feature an AI director which will provide the enemy with information instead of the direct location of the player and will use a behaviour tree for the main decision making.
-3. Unity
-4. My main inspiration behind the ai and the ai director is alien isolation
-5. I will use a kanban board on Trello. The overall schedule will follow scene set up -> pathfinding work -> rough creation of the behaviour tree -> refining behaviour tree and ai senses -> scene visuals if i have enough time.
-6. Features i plan to add: node based path finding, behaviour tree with unlockable elements, AI director/controller, senses such as sight and hearing, FSM
-7. I will regularly commit to this github repo and will detail the work done.
-8. references.txt
+## Overview
+
+My game will feature:
+- A small creature using a stack based FSM
+- An enemy using a behaviour tree
+- An ai director to push the enemy towards or away from the player
+- sight and vision for the enemy
+- node based A* pathfinding
+
+## Inspiration
+My main inspirations for this game and the systems is Alien isolation which also featured a similar AI director to prevent the player from seeing too much or too little of the enemy.
+
+## Methods
+I will manage my source code through my github repo and will plan and manage my progress through the planned tasks using a kanban board on trello
+
+## To Do
+
+- tasks planned: 
+    - behaviour tree
+    - ai director
+    - finite state machine
+    - sound events
+
+- tasks in progress:
+    - pathfinding
+
+- tasks completed:
+    - node based nav mesh
+    - enemy vision
+
+## references
