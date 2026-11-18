@@ -34,6 +34,7 @@ public class MyNavMesh : MonoBehaviour
 
     bool pathfind = true;
     bool nodesCollision = true;
+    bool moveOnPath = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -51,15 +52,16 @@ public class MyNavMesh : MonoBehaviour
 
         if (pathfind)
         {
-            Astar(enemy.transform.position.x, enemy.transform.position.z, Player.transform.position.x, Player.transform.position.z);
+            currentPath = Astar(enemy.transform.position.x, enemy.transform.position.z, Player.transform.position.x, Player.transform.position.z);
 
             
             pathfind = false;
         }
 
-        if (currentPath != null)
+        if (currentPath != null && moveOnPath)
         {
             StartCoroutine(nameof(traversePath), currentPath);
+            moveOnPath = false;
         }
     }
 
@@ -85,6 +87,7 @@ public class MyNavMesh : MonoBehaviour
             {
                 GameObject a = Instantiate(cube, new Vector3(x + 0.5f, 1, y + 0.5f), Quaternion.identity);
                 a.transform.localScale = Vector3.one * gridResolution * 0.9f;
+                a.GetComponent<MeshRenderer>().enabled = false;
                 Node node = new(false, a);
                 GOs[x, y] = node;
             }
@@ -98,7 +101,7 @@ public class MyNavMesh : MonoBehaviour
                                   GOs[x- 1, z+ 1], GOs[x- 1, z- 1], GOs[x- 1, z],};
     }
 
-    void Astar(float xOrigin, float zOrigin, float xDest, float zDest)
+    List<Node> Astar(float xOrigin, float zOrigin, float xDest, float zDest)
     {
         List<Node> path = new List<Node>();
         path.Add(GOs[(int)xOrigin, (int)zOrigin]);
@@ -107,22 +110,17 @@ public class MyNavMesh : MonoBehaviour
 
         foreach (Node node in path)
         {
-            try { node.obj.GetComponent<MeshRenderer>().material.color = new Color(0, 0, 0, 1); }
-            catch
-            {
-                Debug.Log(path.FindIndex(a => a.obj.GetEntityId() == node.obj.GetEntityId()));
-            }
-            
+            node.obj.GetComponent<MeshRenderer>().material.color = new Color(0, 0, 0, 1);
         }
 
-        currentPath = path;
+        return path;
     }
 
     List<Node> evaluateAdjacentNodes(List<Node> pathSoFar, Node dest) // return node with lowest heuristic
     {
         if (pathSoFar.Count == 0)
         {
-            pathSoFar.Add(GOs[(int)transform.position.x, (int)transform.position.z]);
+            pathSoFar.Add(GOs[(int)enemy.transform.position.x, (int)enemy.transform.position.z]);
         }
         Node startNode = pathSoFar[pathSoFar.Count - 1];
         Node chosenNode = new();
@@ -145,20 +143,21 @@ public class MyNavMesh : MonoBehaviour
             }
         }
 
-        pathSoFar.Add(chosenNode);
         if (chosenNode.obj == dest.obj)
         {  
             return pathSoFar; 
         }
         else
         {
+            pathSoFar.Add(chosenNode);
             return evaluateAdjacentNodes(pathSoFar, dest); // return the 
         }
     }
 
-    float moveTime = 1.0f;
-    IEnumerable traversePath(List<Node> path)
+    float moveTime = 0.5f;
+    IEnumerator traversePath(List<Node> path)
     {
+        Debug.Log("start movement");
         Node current, next;
 
         for (int x = 0; x < path.Count; x++)
@@ -166,12 +165,14 @@ public class MyNavMesh : MonoBehaviour
             current = path[x];
             next = path[x + 1];
             float timeMoving = 0.0f;
-            while (next.obj.transform.position != transform.position)
+            while (next.obj.transform.position != enemy.transform.position)
             {
-                transform.position = Vector3.Lerp(current.obj.transform.position, next.obj.transform.position, Mathf.Min( timeMoving / moveTime, 1.0f));
+                enemy.transform.position = Vector3.Lerp(current.obj.transform.position, next.obj.transform.position, Mathf.Min( timeMoving / moveTime, 1.0f));
                 yield return null;
                 timeMoving += Time.deltaTime;
             }
+            Debug.Log("next node");
+            //if (x == path.Count - 2) { yield break; }
         }
     }
 }
